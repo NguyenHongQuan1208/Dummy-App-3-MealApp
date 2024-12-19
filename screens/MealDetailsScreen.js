@@ -9,24 +9,30 @@ import {
 } from "react-native";
 import { MEALS } from "../data/dummy-data";
 import MealDetails from "../components/MealDetails";
-import SubTitle from "../components/MealDetail/Subtitle";
+import Subtitle from "../components/MealDetail/Subtitle";
 import List from "../components/MealDetail/List";
 import IconButton from "../components/MealDetail/IconButton";
-import { FavoritesContext } from "../store/context/favorites-context";
+import { useDispatch, useSelector } from "react-redux";
+//import { FavoritesContext } from "../store/context/favorites-context";
+import { addFavorite, removeFavorite } from "../store/redux/favorites";
 
-function MealDetailsScreen({ route, navigation }) {
-  const favoriteMealsCtx = useContext(FavoritesContext);
+function MealDetailScreen({ route, navigation }) {
+  // const favoriteMealsCtx = useContext(FavoritesContext);
+  const favoriteMealIds = useSelector((state) => state.favoriteMeals.ids);
+  const dispatch = useDispatch();
 
   const mealId = route.params.mealId;
   const selectedMeal = MEALS.find((meal) => meal.id === mealId);
 
-  const mealIsFavorite = favoriteMealsCtx.ids.includes(mealId);
+  const mealIsFavorite = favoriteMealIds.includes(mealId);
 
   function changeFavoriteStatusHandler() {
     if (mealIsFavorite) {
-      favoriteMealsCtx.removeFavorite(mealId);
+      // favoriteMealsCtx.removeFavorite(mealId);
+      dispatch(removeFavorite({ id: mealId }));
     } else {
-      favoriteMealsCtx.addFavorite(mealId);
+      // favoriteMealsCtx.addFavorite(mealId);
+      dispatch(addFavorite({ id: mealId }));
     }
   }
 
@@ -43,6 +49,7 @@ function MealDetailsScreen({ route, navigation }) {
       },
     });
   }, [navigation, changeFavoriteStatusHandler]);
+
   return (
     <ScrollView style={styles.rootContainer}>
       <Image style={styles.image} source={{ uri: selectedMeal.imageUrl }} />
@@ -52,21 +59,21 @@ function MealDetailsScreen({ route, navigation }) {
         complexity={selectedMeal.complexity}
         affordability={selectedMeal.affordability}
         textStyle={styles.detailText}
-      ></MealDetails>
+      />
       <View style={styles.listOuterContainer}>
         <View style={styles.listContainer}>
-          <SubTitle>Ingredients</SubTitle>
-          <List data={selectedMeal.ingredients}></List>
-
-          <SubTitle>Steps</SubTitle>
-          <List data={selectedMeal.steps}></List>
+          <Subtitle>Ingredients</Subtitle>
+          <List data={selectedMeal.ingredients} />
+          <Subtitle>Steps</Subtitle>
+          <List data={selectedMeal.steps} />
         </View>
       </View>
     </ScrollView>
   );
 }
 
-export default MealDetailsScreen;
+export default MealDetailScreen;
+
 const styles = StyleSheet.create({
   rootContainer: {
     marginBottom: 32,
